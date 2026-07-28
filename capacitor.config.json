@@ -1,0 +1,14 @@
+{
+  "appId": "com.sumikko.keiri",
+  "appName": "すみっこ経理",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true
+    }
+  }
+}

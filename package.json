@@ -1,0 +1,29 @@
+{
+  "name": "sumikko-keiri",
+  "version": "1.0.0",
+  "description": "すみっこ経理 Capacitor アプリ",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "sync": "npm run build && npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/app": "^7.0.2",
+    "@capacitor/browser": "^7.0.2",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/core": "^7.4.2",
+    "@capacitor/ios": "^7.4.2",
+    "@capacitor/splash-screen": "^7.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.2",
+    "vite": "^7.3.1"
+  },
+  "license": "ISC"
+}
