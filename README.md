@@ -3,28 +3,31 @@
 無料のオープンソース枠組み [Capacitor](https://capacitorjs.com/) で作るモバイルアプリです。  
 クラウドビルド（Ionic Appflow 等）は別途有料ですが、**Capacitor 自体の利用料は不要**です。
 
-## 場所
+## リポジトリ
 
-`/var/www/html/sumikko-keiri-app`
-
-## ローカル（あなたのPC）でビルドする
-
-必要なもの:
-
-- Node.js 20+
-- Android: Android Studio
-- iOS: Mac + Xcode
+https://github.com/NaoyaOshima708/sumikko-keiri-app
 
 ```bash
+git clone https://github.com/NaoyaOshima708/sumikko-keiri-app.git
 cd sumikko-keiri-app
 npm install
 npm run sync
-npm run open:android   # または open:ios
+npm run open:android
 ```
 
-実機/エミュレータで起動してください。
+## ビルドに必要なもの
 
-## 開発中のブラウザ確認
+- Node.js 20+
+- Android: Android Studio（Windows可）
+- iOS: Mac + Xcode（後回し可）
+
+コード変更後は毎回:
+
+```bash
+npm run sync
+```
+
+## ブラウザ確認
 
 ```bash
 npm start
@@ -42,8 +45,3 @@ npm start
 - LINE友だちゲート
 - 領収書一覧 / 撮影アップロード / 詳細
 - Claude APIキー設定
-
-## 次
-
-- LINE Login
-- Google Sheets 設定画面
