@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="com.sumikko.keiri" version="1.0.0">
+  <name>すみっこ経理</name>
+  <description>領収書撮影とOCRの経理アプリ</description>
+  <author email="support@sumikko-app.com" href="https://receipt.sumikko-app.com">すみっこ経理</author>
+  <content src="index.html"/>
+  <allow-navigation href="*"/>
+  <access origin="*"/>
+  <allow-intent href="http://*/*"/>
+  <allow-intent href="https://*/*"/>
+  <allow-intent href="tel:*"/>
+  <allow-intent href="sms:*"/>
+  <allow-intent href="mailto:*"/>
+  <allow-intent href="geo:*"/>
+  <platform name="android">
+    <preference name="AndroidLaunchMode" value="singleTop"/>
+    <preference name="AndroidInsecureFileModeEnabled" value="true"/>
+  </platform>
+  <platform name="ios">
+    <preference name="WKWebViewOnly" value="true"/>
+    <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine"/>
+  </platform>
+  <preference name="Orientation" value="portrait"/>
+  <preference name="Fullscreen" value="false"/>
+  <preference name="DisallowOverscroll" value="true"/>
+</widget>

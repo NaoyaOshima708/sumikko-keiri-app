@@ -1,29 +1,24 @@
 {
   "name": "sumikko-keiri",
+  "displayName": "すみっこ経理",
   "version": "1.0.0",
-  "description": "すみっこ経理 Capacitor アプリ",
-  "type": "module",
+  "description": "すみっこ経理 Monaca / Onsen UI アプリ",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "sync": "npm run build && npx cap sync",
-    "open:android": "npx cap open android",
-    "open:ios": "npx cap open ios"
+    "start": "npx --yes serve www -p 8080",
+    "preview": "npx --yes serve www -p 8080"
   },
   "dependencies": {
-    "@capacitor/android": "^7.4.2",
-    "@capacitor/app": "^7.0.2",
-    "@capacitor/browser": "^7.0.2",
-    "@capacitor/camera": "^7.0.2",
-    "@capacitor/core": "^7.4.2",
-    "@capacitor/ios": "^7.4.2",
-    "@capacitor/splash-screen": "^7.0.2"
+    "cordova-plugin-camera": "^7.0.0",
+    "cordova-plugin-inappbrowser": "^6.0.0"
   },
-  "devDependencies": {
-    "@capacitor/cli": "^7.4.2",
-    "vite": "^7.3.1"
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-camera": {},
+      "cordova-plugin-inappbrowser": {}
+    }
+  },
+  "engines": {
+    "node": ">=18"
   },
   "license": "ISC"
 }

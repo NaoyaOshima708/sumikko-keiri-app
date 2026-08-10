@@ -1,0 +1,23 @@
+<ons-page id="uploadPage">
+  <ons-toolbar>
+    <div class="left">
+      <ons-back-button>戻る</ons-back-button>
+    </div>
+    <div class="center">アップロード</div>
+  </ons-toolbar>
+  <div class="form-block">
+    <label class="field-label">モデル</label>
+    <select id="modelSelect" class="select-input"></select>
+    <div class="stack-gap" style="margin-top:16px">
+      <ons-button modifier="large" id="cameraBtn">カメラで撮影</ons-button>
+      <ons-button modifier="large outline" id="galleryBtn">ギャラリーから選択</ons-button>
+    </div>
+    <div class="preview-row" id="previewRow"></div>
+    <div class="stack-gap">
+      <ons-button modifier="large" id="sendBtn" disabled>送信して解析</ons-button>
+    </div>
+    <p class="hint-text" id="uploadHint"></p>
+    <p class="error-text" id="uploadError"></p>
+    <input id="fileFallback" type="file" accept="image/*" multiple hidden>
+  </div>
+</ons-page>

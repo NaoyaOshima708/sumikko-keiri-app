@@ -5,19 +5,21 @@ node_modules/
 .DS_Store
 .sourcemaps
 dist/
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
 
-# Capacitor / native
+# 旧 Capacitor 成果物（残っていれば無視）
 android/.gradle/
 android/app/build/
 android/build/
 android/local.properties
-android/captures/
-android/*.iml
-android/.idea/
 ios/App/Pods/
 ios/App/App/public/
-*.keystore
-*.jks
-.env
-.env.*
-!.env.example
+
+# Monaca / Cordova ローカル生成物
+platforms/
+plugins/
+.monaca/local_properties.json

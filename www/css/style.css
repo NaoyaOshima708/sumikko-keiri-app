@@ -1,0 +1,145 @@
+:root {
+  --brand: #1f6f5b;
+  --brand-soft: #e8f4f0;
+  --text: #222;
+  --muted: #6b7280;
+  --danger: #c0392b;
+  --line: #06c755;
+  --card: #fff;
+  --bg: #f3f5f7;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.brand-row span span:last-child {
+  color: var(--brand);
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 8px 0 16px;
+}
+
+.form-block {
+  padding: 16px;
+}
+
+.form-block ons-input,
+.form-block input,
+.form-block select,
+.select-input {
+  width: 100%;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.select-input {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 10px;
+  white-space: pre-wrap;
+}
+
+.hint-text {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.stack-gap {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-line {
+  background: var(--line) !important;
+  color: #fff !important;
+}
+
+.receipt-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.receipt-item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.receipt-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.receipt-amount {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.empty-box {
+  text-align: center;
+  color: var(--muted);
+  padding: 48px 16px;
+}
+
+.preview-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.preview-row img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #ddd;
+}
+
+.detail-amount {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 8px 0 12px;
+}
+
+.fab-upload {
+  position: absolute;
+  right: 18px;
+  bottom: 22px;
+  z-index: 10;
+}

@@ -1,0 +1,19 @@
+<ons-page id="loginPage">
+  <ons-toolbar>
+    <div class="center">
+      <div class="brand-row"><span><span>すみっこ</span><span>経理</span></span></div>
+    </div>
+  </ons-toolbar>
+  <div class="form-block">
+    <h2>ログイン</h2>
+    <p class="lead">メールでログイン（LINEログインは次に接続）</p>
+    <label class="field-label">メール</label>
+    <ons-input id="emailInput" type="email" modifier="underbar" placeholder="mail@example.com" float></ons-input>
+    <label class="field-label">パスワード</label>
+    <ons-input id="passwordInput" type="password" modifier="underbar" placeholder="パスワード" float></ons-input>
+    <div class="stack-gap">
+      <ons-button modifier="large" id="loginBtn">ログイン</ons-button>
+    </div>
+    <p class="error-text" id="loginError"></p>
+  </div>
+</ons-page>

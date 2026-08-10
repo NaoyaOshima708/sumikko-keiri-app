@@ -1,0 +1,16 @@
+.git/
+.idea/
+.vscode/
+node_modules/
+android/
+ios/
+dist/
+src/
+capacitor.config.json
+vite.config.ts
+*.map
+.DS_Store
+.env
+.env.*
+*.keystore
+*.jks
