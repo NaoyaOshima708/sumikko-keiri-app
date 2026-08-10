@@ -252,27 +252,17 @@
     sendBtn.disabled = state.pendingFiles.length === 0;
   }
 
+  function resolveUploadModel() {
+    // 一括変更は SumikkoConfig.defaultModel を編集する
+    return (SumikkoConfig && SumikkoConfig.defaultModel) || 'claude-sonnet-5';
+  }
+
   async function prepareUpload(page) {
     state.pendingFiles = [];
-    const select = page.querySelector('#modelSelect');
     const hint = page.querySelector('#uploadHint');
     const err = page.querySelector('#uploadError');
     hint.textContent = '';
     err.textContent = '';
-    select.innerHTML = '';
-    try {
-      state.settings = await SumikkoApi.settings();
-      const models = state.settings.models || [];
-      models.forEach(function (m) {
-        const opt = document.createElement('option');
-        opt.value = m.id;
-        opt.textContent = m.label + ' / ' + m.name;
-        if (m.id === state.settings.default_model) opt.selected = true;
-        select.appendChild(opt);
-      });
-    } catch (e) {
-      err.textContent = e.message || String(e);
-    }
     refreshUploadUi(page);
   }
 
@@ -345,10 +335,7 @@
   }
 
   async function sendUpload(page) {
-    const model =
-      page.querySelector('#modelSelect').value ||
-      (state.settings && state.settings.default_model) ||
-      'claude-sonnet-5';
+    const model = resolveUploadModel();
     const hint = page.querySelector('#uploadHint');
     const err = page.querySelector('#uploadError');
     hint.textContent = '送信中...';

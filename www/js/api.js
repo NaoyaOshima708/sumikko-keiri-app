@@ -4,6 +4,8 @@
   const config = {
     apiBase: 'https://receipt.sumikko-app.com/api',
     addFriendUrl: 'https://line.me/R/ti/p/@930uwhek',
+    // 解析モデル（UIでは選択させず、ここだけ変えれば一括変更）
+    defaultModel: 'claude-sonnet-5',
   };
 
   function getToken() {
