@@ -8,7 +8,7 @@
   <div class="wrap">
     <div class="card">
       <h1 class="page-title">レシートを撮る</h1>
-      <p class="lead">カメラまたはギャラリーから画像を選んで送信します。<br>解析は標準モデル（Claude Sonnet 5）で行います。</p>
+      <p class="lead">撮影または選択すると、そのまま解析を開始します。<br>解析は標準モデル（Claude Sonnet 5）です。</p>
 
       <div class="stack">
         <button type="button" class="btn btn-primary" id="cameraBtn">カメラで撮影</button>
@@ -17,7 +17,7 @@
 
       <div class="preview-row" id="previewRow"></div>
 
-      <button type="button" class="btn btn-primary" id="sendBtn" disabled>送信して解析</button>
+      <button type="button" class="btn btn-primary" id="sendBtn" disabled>再送信して解析</button>
       <p class="hint-text" id="uploadHint"></p>
       <p class="error-text" id="uploadError"></p>
       <input id="fileFallback" type="file" accept="image/*" multiple hidden>

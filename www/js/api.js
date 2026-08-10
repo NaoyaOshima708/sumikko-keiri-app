@@ -234,11 +234,16 @@
 
       const fd = new FormData();
       fd.append('model', model);
+      let count = 0;
       items.forEach(function (item, i) {
         const file = item.file;
         if (!file) return;
         fd.append('images[]', file, file.name || 'receipt-' + i + '.jpg');
+        count += 1;
       });
+      if (!count) {
+        return Promise.reject(new Error('送信できる画像がありません'));
+      }
       return requestXhr('/receipts', { method: 'POST', body: fd });
     },
   };

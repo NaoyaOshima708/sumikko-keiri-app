@@ -239,13 +239,13 @@
   function refreshUploadUi(page) {
     const preview = page.querySelector('#previewRow');
     const sendBtn = page.querySelector('#sendBtn');
+    if (!preview || !sendBtn) return;
     preview.innerHTML = '';
     state.pendingFiles.forEach(function (item) {
       const img = document.createElement('img');
-      const file = item && item.file ? item.file : item;
-      const path = item && item.path ? item.path : '';
-      if (file) img.src = URL.createObjectURL(file);
-      else if (path) img.src = path;
+      if (item && item.preview) img.src = item.preview;
+      else if (item && item.file) img.src = URL.createObjectURL(item.file);
+      else if (item && item.path) img.src = item.path;
       img.alt = '';
       preview.appendChild(img);
     });
@@ -261,64 +261,141 @@
     state.pendingFiles = [];
     const hint = page.querySelector('#uploadHint');
     const err = page.querySelector('#uploadError');
-    hint.textContent = '';
-    err.textContent = '';
+    if (hint) hint.textContent = '';
+    if (err) err.textContent = '';
     refreshUploadUi(page);
   }
 
   function addPendingItem(item, page) {
     state.pendingFiles = state.pendingFiles.concat([item]).slice(0, 10);
-    page.querySelector('#uploadError').textContent = '';
+    const err = page.querySelector('#uploadError');
+    if (err) err.textContent = '';
     refreshUploadUi(page);
   }
 
-  function uriToFile(uri) {
-    return fetch(uri)
-      .then(function (res) {
-        return res.blob();
-      })
-      .then(function (blob) {
-        return new File([blob], 'receipt-' + Date.now() + '.jpg', {
-          type: blob.type || 'image/jpeg',
-        });
-      });
+  function dataUrlToFile(dataUrl, filename) {
+    const parts = String(dataUrl).split(',');
+    const mimeMatch = parts[0] && parts[0].match(/:(.*?);/);
+    const mime = (mimeMatch && mimeMatch[1]) || 'image/jpeg';
+    const bin = atob(parts[1] || '');
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    const blob = new Blob([arr], { type: mime });
+    try {
+      return new File([blob], filename || 'receipt.jpg', { type: mime });
+    } catch (e) {
+      // 古いWebView向け
+      blob.name = filename || 'receipt.jpg';
+      return blob;
+    }
+  }
+
+  function setUploadStatus(page, hintText, errorText) {
+    const hint = page.querySelector('#uploadHint');
+    const err = page.querySelector('#uploadError');
+    if (hint) hint.textContent = hintText || '';
+    if (err) err.textContent = errorText || '';
+  }
+
+  async function sendUpload(page) {
+    const model = resolveUploadModel();
+    if (!state.pendingFiles.length) {
+      setUploadStatus(page, '', '画像がありません。撮影または選択してください。');
+      return;
+    }
+    const hasFile = state.pendingFiles.some(function (x) {
+      return x && x.file;
+    });
+    if (!hasFile) {
+      setUploadStatus(page, '', '画像データの変換に失敗しました。もう一度撮影してください。');
+      return;
+    }
+
+    setUploadStatus(page, '送信・解析中です…少々お待ちください', '');
+    const sendBtn = page.querySelector('#sendBtn');
+    if (sendBtn) sendBtn.disabled = true;
+
+    try {
+      console.log('upload start count=', state.pendingFiles.length, 'model=', model);
+      const res = await SumikkoApi.uploadReceipts(state.pendingFiles, model);
+      console.log('upload ok', res);
+      state.pendingFiles = [];
+      refreshUploadUi(page);
+      setUploadStatus(page, (res && res.message) || '送信しました。履歴に反映します。', '');
+      setTimeout(function () {
+        nav().popPage({ animation: 'fade' });
+      }, 800);
+    } catch (e) {
+      console.error('upload failed', e && e.message, e);
+      setUploadStatus(page, '', e.message || String(e));
+      if (sendBtn) sendBtn.disabled = state.pendingFiles.length === 0;
+    }
+  }
+
+  function handlePickedFile(file, previewUrl, page) {
+    addPendingItem({ file: file, preview: previewUrl || '' }, page);
+    // 撮影/選択したらそのまま解析へ（追加操作不要）
+    sendUpload(page);
   }
 
   function pickWithCordova(sourceType, page) {
+    if (!navigator.camera || typeof Camera === 'undefined') {
+      setUploadStatus(page, '', 'Cameraプラグインが有効ではありません');
+      pickWithBrowser(page);
+      return;
+    }
+
+    setUploadStatus(page, 'カメラ／ギャラリーを起動しています…', '');
     navigator.camera.getPicture(
-      function (uri) {
-        // ネイティブHTTP用に path を残す（CORS回避）
-        uriToFile(uri)
-          .then(function (file) {
-            addPendingItem({ file: file, path: uri }, page);
-          })
-          .catch(function () {
-            addPendingItem({ path: uri }, page);
-          });
+      function (data) {
+        try {
+          console.log('camera success bytes=', String(data || '').length);
+          // DATA_URL（base64）で受け取る。file:// 変換は Cordova で止まりやすい
+          const dataUrl = String(data).indexOf('data:') === 0 ? data : 'data:image/jpeg;base64,' + data;
+          const file = dataUrlToFile(dataUrl, 'receipt-' + Date.now() + '.jpg');
+          handlePickedFile(file, dataUrl, page);
+        } catch (e) {
+          console.error('camera convert failed', e);
+          setUploadStatus(page, '', '画像の変換に失敗しました: ' + (e.message || e));
+        }
       },
       function (message) {
-        if (String(message).toLowerCase().indexOf('cancel') >= 0) return;
-        page.querySelector('#uploadError').textContent = String(message);
+        const msg = String(message || '');
+        if (msg.toLowerCase().indexOf('cancel') >= 0) {
+          setUploadStatus(page, '', '');
+          return;
+        }
+        console.error('camera error', msg);
+        setUploadStatus(page, '', msg || 'カメラの起動に失敗しました');
       },
       {
-        quality: 85,
-        destinationType: Camera.DestinationType.FILE_URI,
+        quality: 70,
+        destinationType: Camera.DestinationType.DATA_URL,
         sourceType: sourceType,
         correctOrientation: true,
         encodingType: Camera.EncodingType.JPEG,
         mediaType: Camera.MediaType.PICTURE,
+        saveToPhotoAlbum: false,
+        allowEdit: false,
       }
     );
   }
 
   function pickWithBrowser(page) {
     const input = page.querySelector('#fileFallback');
+    if (!input) {
+      setUploadStatus(page, '', 'ファイル選択が使えません');
+      return;
+    }
     input.value = '';
     input.onchange = function () {
-      const files = Array.prototype.slice.call(input.files || []);
-      files.forEach(function (f) {
-        addPendingItem({ file: f }, page);
+      const files = Array.prototype.slice.call(input.files || []).slice(0, 10);
+      if (!files.length) return;
+      state.pendingFiles = files.map(function (f) {
+        return { file: f, preview: URL.createObjectURL(f) };
       });
+      refreshUploadUi(page);
+      sendUpload(page);
     };
     input.click();
   }
@@ -330,28 +407,7 @@
       pickWithCordova(source, page);
       return;
     }
-    // ブラウザ / プラグイン未導入時のフォールバック
     pickWithBrowser(page);
-  }
-
-  async function sendUpload(page) {
-    const model = resolveUploadModel();
-    const hint = page.querySelector('#uploadHint');
-    const err = page.querySelector('#uploadError');
-    hint.textContent = '送信中...';
-    err.textContent = '';
-    try {
-      const res = await SumikkoApi.uploadReceipts(state.pendingFiles, model);
-      state.pendingFiles = [];
-      hint.textContent = res.message || '送信しました';
-      refreshUploadUi(page);
-      setTimeout(function () {
-        nav().popPage();
-      }, 700);
-    } catch (e) {
-      hint.textContent = '';
-      err.textContent = e.message || String(e);
-    }
   }
 
   // 各 ons-page が表示されるときに一度だけ結線する
