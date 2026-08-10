@@ -238,7 +238,16 @@
       items.forEach(function (item, i) {
         const file = item.file;
         if (!file) return;
-        fd.append('images[]', file, file.name || 'receipt-' + i + '.jpg');
+        const name = file.name || 'receipt-' + i + '.jpg';
+        // iOS: File だと FormData.append が落ちることがある → 素の Blob に切り直す
+        const blob =
+          file instanceof Blob
+            ? file.slice(0, file.size, file.type || 'image/jpeg')
+            : null;
+        if (!blob) {
+          throw new Error('画像データが Blob ではありません');
+        }
+        fd.append('images[]', blob, name);
         count += 1;
       });
       if (!count) {

@@ -273,21 +273,20 @@
     refreshUploadUi(page);
   }
 
+  // iOS WebView では new File() が FormData.append で Blob 扱いにならず落ちる
+  // → 常に素の Blob + name で返す
   function dataUrlToFile(dataUrl, filename) {
     const parts = String(dataUrl).split(',');
     const mimeMatch = parts[0] && parts[0].match(/:(.*?);/);
     const mime = (mimeMatch && mimeMatch[1]) || 'image/jpeg';
-    const bin = atob(parts[1] || '');
+    const b64 = parts[1] || '';
+    if (!b64) throw new Error('画像データが空です');
+    const bin = atob(b64);
     const arr = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
     const blob = new Blob([arr], { type: mime });
-    try {
-      return new File([blob], filename || 'receipt.jpg', { type: mime });
-    } catch (e) {
-      // 古いWebView向け
-      blob.name = filename || 'receipt.jpg';
-      return blob;
-    }
+    blob.name = filename || 'receipt.jpg';
+    return blob;
   }
 
   function setUploadStatus(page, hintText, errorText) {
