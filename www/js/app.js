@@ -118,7 +118,7 @@
     const list = page.querySelector('#receiptList');
     const empty = page.querySelector('#homeEmpty');
     const lead = page.querySelector('#homeLead');
-    lead.textContent = monthNow().replace('-', '/') + ' ／ 下の＋から撮影';
+    lead.textContent = monthNow().replace('-', '/') + ' ／ 右下の＋から撮影';
     list.innerHTML = '';
     empty.style.display = 'none';
 
@@ -376,6 +376,9 @@
     }
 
     if (page.id === 'uploadPage') {
+      page.querySelector('#uploadBackBtn').onclick = function () {
+        nav().popPage();
+      };
       page.querySelector('#cameraBtn').onclick = function () {
         pickImage('camera', page);
       };
@@ -390,11 +393,17 @@
     }
 
     if (page.id === 'detailPage') {
+      page.querySelector('#detailBackBtn').onclick = function () {
+        nav().popPage();
+      };
       fillDetail(page);
       return;
     }
 
     if (page.id === 'settingsPage') {
+      page.querySelector('#settingsBackBtn').onclick = function () {
+        nav().popPage();
+      };
       page.querySelector('#saveKeyBtn').onclick = function () {
         saveKey(page);
       };
