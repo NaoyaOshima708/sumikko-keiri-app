@@ -118,7 +118,7 @@
     const list = page.querySelector('#receiptList');
     const empty = page.querySelector('#homeEmpty');
     const lead = page.querySelector('#homeLead');
-    lead.textContent = '履歴（' + monthNow() + '） / 下の＋から撮影できます';
+    lead.textContent = monthNow().replace('-', '/') + ' ／ 下の＋から撮影';
     list.innerHTML = '';
     empty.style.display = 'none';
 
@@ -130,19 +130,19 @@
         return;
       }
       items.forEach(function (r) {
-        const el = document.createElement('ons-list-item');
-        el.setAttribute('modifier', 'chevron');
-        el.setAttribute('tappable', '');
+        const el = document.createElement('div');
+        el.className = 'receipt-card';
         el.innerHTML =
-          '<div class="center">' +
-          '<strong>' + escapeHtml(r.merchant_name || '（店舗名なし）') + '</strong>' +
-          '<div class="receipt-meta">' +
-          escapeHtml((r.purchased_at || '').slice(0, 10) || '-') +
-          ' / ' + escapeHtml(r.status) +
+          '<div class="left-col">' +
+          '<div class="name">' + escapeHtml(r.merchant_name || '（店舗名なし）') + '</div>' +
+          '<div class="meta">' +
+          escapeHtml((r.purchased_at || '').slice(0, 16).replace('T', ' ') || '-') +
           '</div></div>' +
-          '<div class="right receipt-amount">' +
+          '<div class="right-col">' +
+          '<div class="status">' + escapeHtml(r.status || '-') + '</div>' +
+          '<div class="amount">' +
           (r.total_amount != null ? '¥' + Number(r.total_amount).toLocaleString() : '-') +
-          '</div>';
+          '</div></div>';
         el.onclick = function () {
           openDetail(r.id);
         };
@@ -174,7 +174,7 @@
       (r.purchased_at || '').slice(0, 16).replace('T', ' ') || '-';
     page.querySelector('#detailAmount').textContent =
       r.total_amount != null ? '¥' + Number(r.total_amount).toLocaleString() : '-';
-    page.querySelector('#detailStatus').textContent = '状態: ' + (r.status || '-');
+    page.querySelector('#detailStatus').textContent = r.status || '-';
     page.querySelector('#detailError').textContent = r.error_message || '';
   }
 

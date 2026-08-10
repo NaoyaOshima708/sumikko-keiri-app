@@ -3,13 +3,16 @@
     <div class="left">
       <ons-back-button>戻る</ons-back-button>
     </div>
-    <div class="center">詳細</div>
+    <div class="center">読み取り内容</div>
   </ons-toolbar>
-  <div class="form-block">
-    <h2 id="detailTitle">（店舗名なし）</h2>
-    <p class="lead" id="detailDate">-</p>
-    <p class="detail-amount" id="detailAmount">-</p>
-    <p class="hint-text" id="detailStatus"></p>
-    <p class="error-text" id="detailError"></p>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 class="page-title" id="detailTitle">（店舗名なし）</h1>
+      <p class="detail-amount" id="detailAmount">-</p>
+      <div class="detail-row"><span class="k">日付</span><span class="v" id="detailDate">-</span></div>
+      <div class="detail-row"><span class="k">状態</span><span class="v" id="detailStatus">-</span></div>
+      <p class="error-text" id="detailError"></p>
+    </div>
   </div>
 </ons-page>

@@ -1,16 +1,25 @@
 <ons-page id="friendPage">
   <ons-toolbar>
-    <div class="center">友だち追加が必要</div>
+    <div class="center">
+      <span class="brand-mark">
+        <img src="img/sumikko-keiri-logo.png" alt="">
+        <span><span class="b-sumikko">すみっこ</span><span class="b-keiri">経理</span></span>
+      </span>
+    </div>
     <div class="right">
       <ons-toolbar-button id="friendLogoutBtn">ログアウト</ons-toolbar-button>
     </div>
   </ons-toolbar>
-  <div class="form-block">
-    <p class="lead">公式アカウントを友だち追加すると利用できます。ブロック中も同じです。</p>
-    <div class="stack-gap">
-      <ons-button modifier="large" class="btn-line" id="openFriendBtn">友だち追加を開く</ons-button>
-      <ons-button modifier="large outline" id="checkFriendBtn">追加したので確認</ons-button>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 class="page-title">友だち追加が必要</h1>
+      <p class="lead">公式アカウントを友だち追加すると利用できます。ブロック中も同じです。</p>
+      <div class="stack">
+        <button type="button" class="btn btn-line" id="openFriendBtn">友だち追加を開く</button>
+        <button type="button" class="btn btn-outline" id="checkFriendBtn">追加したので確認</button>
+      </div>
+      <p class="error-text" id="friendError"></p>
     </div>
-    <p class="error-text" id="friendError"></p>
   </div>
 </ons-page>

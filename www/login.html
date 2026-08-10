@@ -1,19 +1,31 @@
 <ons-page id="loginPage">
   <ons-toolbar>
     <div class="center">
-      <div class="brand-row"><span><span>すみっこ</span><span>経理</span></span></div>
+      <span class="brand-mark">
+        <img src="img/sumikko-keiri-logo.png" alt="">
+        <span><span class="b-sumikko">すみっこ</span><span class="b-keiri">経理</span></span>
+      </span>
     </div>
   </ons-toolbar>
-  <div class="form-block">
-    <h2>ログイン</h2>
-    <p class="lead">メールでログイン（LINEログインは次に接続）</p>
-    <label class="field-label">メール</label>
-    <ons-input id="emailInput" type="email" modifier="underbar" placeholder="mail@example.com" float></ons-input>
-    <label class="field-label">パスワード</label>
-    <ons-input id="passwordInput" type="password" modifier="underbar" placeholder="パスワード" float></ons-input>
-    <div class="stack-gap">
-      <ons-button modifier="large" id="loginBtn">ログイン</ons-button>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="center-col">
+        <img class="logo-lg" src="img/sumikko-keiri-logo.png" alt="すみっこ経理">
+        <p class="lead">メールでログインできます。<br>LINEログインはあとで接続します。</p>
+      </div>
+
+      <label class="field">メールアドレス
+        <input id="emailInput" type="email" autocomplete="username" placeholder="mail@example.com">
+      </label>
+      <label class="field">パスワード
+        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="パスワード">
+      </label>
+
+      <div class="stack">
+        <button type="button" class="btn btn-primary" id="loginBtn">メールでログイン</button>
+      </div>
+      <p class="error-text" id="loginError"></p>
     </div>
-    <p class="error-text" id="loginError"></p>
   </div>
 </ons-page>

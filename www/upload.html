@@ -5,19 +5,27 @@
     </div>
     <div class="center">アップロード</div>
   </ons-toolbar>
-  <div class="form-block">
-    <label class="field-label">モデル</label>
-    <select id="modelSelect" class="select-input"></select>
-    <div class="stack-gap" style="margin-top:16px">
-      <ons-button modifier="large" id="cameraBtn">カメラで撮影</ons-button>
-      <ons-button modifier="large outline" id="galleryBtn">ギャラリーから選択</ons-button>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 class="page-title">レシートを撮る</h1>
+      <p class="lead">カメラまたはギャラリーから画像を選んで送信します。</p>
+
+      <label class="field">モデル
+        <select id="modelSelect" class="select-input"></select>
+      </label>
+
+      <div class="stack">
+        <button type="button" class="btn btn-primary" id="cameraBtn">カメラで撮影</button>
+        <button type="button" class="btn btn-outline" id="galleryBtn">ギャラリーから選択</button>
+      </div>
+
+      <div class="preview-row" id="previewRow"></div>
+
+      <button type="button" class="btn btn-primary" id="sendBtn" disabled>送信して解析</button>
+      <p class="hint-text" id="uploadHint"></p>
+      <p class="error-text" id="uploadError"></p>
+      <input id="fileFallback" type="file" accept="image/*" multiple hidden>
     </div>
-    <div class="preview-row" id="previewRow"></div>
-    <div class="stack-gap">
-      <ons-button modifier="large" id="sendBtn" disabled>送信して解析</ons-button>
-    </div>
-    <p class="hint-text" id="uploadHint"></p>
-    <p class="error-text" id="uploadError"></p>
-    <input id="fileFallback" type="file" accept="image/*" multiple hidden>
   </div>
 </ons-page>

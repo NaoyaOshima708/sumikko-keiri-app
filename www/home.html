@@ -1,14 +1,26 @@
 <ons-page id="homePage">
   <ons-toolbar>
-    <div class="center">履歴</div>
+    <div class="center">
+      <span class="brand-mark">
+        <img src="img/sumikko-keiri-logo.png" alt="">
+        <span><span class="b-sumikko">すみっこ</span><span class="b-keiri">経理</span></span>
+      </span>
+    </div>
     <div class="right">
       <ons-toolbar-button id="settingsBtn">設定</ons-toolbar-button>
       <ons-toolbar-button id="homeLogoutBtn">ログアウト</ons-toolbar-button>
     </div>
   </ons-toolbar>
-  <p class="lead" style="padding:12px 16px 0" id="homeLead">下の＋から撮影できます</p>
-  <ons-list id="receiptList"></ons-list>
-  <div class="empty-box" id="homeEmpty" style="display:none">この月の領収書はまだありません</div>
+
+  <div class="wrap">
+    <div class="home-head">
+      <h1>レシート履歴</h1>
+      <div class="sub" id="homeLead">当月</div>
+    </div>
+    <div class="receipt-list" id="receiptList"></div>
+    <div class="empty-box" id="homeEmpty" style="display:none">この月の領収書はまだありません<br><span style="font-weight:700;color:#94a3b8;font-size:0.85rem">右下の ＋ から撮影できます</span></div>
+  </div>
+
   <ons-fab class="fab-upload" position="bottom right" id="uploadFab">
     <ons-icon icon="md-plus"></ons-icon>
   </ons-fab>

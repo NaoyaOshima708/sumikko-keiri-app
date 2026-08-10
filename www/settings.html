@@ -5,14 +5,21 @@
     </div>
     <div class="center">設定</div>
   </ons-toolbar>
-  <div class="form-block">
-    <p class="lead" id="settingsLead">Claude APIキー</p>
-    <label class="field-label">APIキー</label>
-    <ons-input id="apiKeyInput" type="password" modifier="underbar" placeholder="sk-ant-..." float></ons-input>
-    <div class="stack-gap">
-      <ons-button modifier="large" id="saveKeyBtn">保存</ons-button>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 class="page-title">Claude APIキー</h1>
+      <p class="lead" id="settingsLead">解析に使うAPIキーを登録します。</p>
+
+      <label class="field">APIキー
+        <input id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off">
+      </label>
+
+      <div class="stack">
+        <button type="button" class="btn btn-primary" id="saveKeyBtn">保存</button>
+      </div>
+      <p class="hint-text" id="settingsHint"></p>
+      <p class="error-text" id="settingsError"></p>
     </div>
-    <p class="hint-text" id="settingsHint"></p>
-    <p class="error-text" id="settingsError"></p>
   </div>
 </ons-page>

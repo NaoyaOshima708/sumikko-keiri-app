@@ -1,145 +1,412 @@
+/* Web版（receipt.sumikko-app.com）に寄せたアプリ見た目 */
+
 :root {
-  --brand: #1f6f5b;
-  --brand-soft: #e8f4f0;
-  --text: #222;
-  --muted: #6b7280;
-  --danger: #c0392b;
-  --line: #06c755;
-  --card: #fff;
-  --bg: #f3f5f7;
+  --bg: #fff7ed; /* orange-50 */
+  --card: #ffffff;
+  --text: #1e293b; /* slate-800 */
+  --muted: #64748b; /* slate-500 */
+  --line-muted: #e2e8f0;
+  --brand-navy: #243242;
+  --brand-orange: #ff5c00;
+  --brand-orange-btn: #ea580c; /* orange-600 */
+  --line-green: #06c755;
+  --danger: #dc2626;
+  --radius: 1rem; /* rounded-2xl */
+  --radius-card: 1.5rem; /* rounded-3xl */
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
 html,
 body {
   height: 100%;
+  margin: 0;
   background: var(--bg);
   color: var(--text);
+  font-family: "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-.brand-row {
-  display: flex;
+/* Onsen ツールバーを Web ヘッダー寄りに */
+ons-toolbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid #ffedd5; /* orange-100 */
+}
+
+ons-toolbar .center {
+  font-weight: 900;
+  color: var(--brand-navy);
+}
+
+ons-back-button,
+ons-toolbar-button {
+  color: var(--brand-orange) !important;
+  font-weight: 700 !important;
+}
+
+ons-page {
+  background: var(--bg) !important;
+}
+
+.page__content {
+  background: var(--bg);
+}
+
+/* ブランド */
+.brand-mark {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
 }
 
-.brand-row span span:last-child {
-  color: var(--brand);
+.brand-mark img {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.brand-mark .b-sumikko {
+  color: var(--brand-navy);
+}
+
+.brand-mark .b-keiri {
+  color: var(--brand-orange);
+}
+
+/* レイアウト */
+.wrap {
+  padding: 16px 16px 96px;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  padding: 24px 20px;
+}
+
+.card-tight {
+  padding: 16px;
+}
+
+.center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logo-lg {
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: contain;
 }
 
 .lead {
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 8px 0 16px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 12px 0 0;
 }
 
-.form-block {
-  padding: 16px;
+.page-title {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--brand-navy);
 }
 
-.form-block ons-input,
-.form-block input,
-.form-block select,
+.section-label {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+/* フォーム */
+.field {
+  display: block;
+  margin-top: 16px;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.field input,
+.field ons-input,
 .select-input {
+  display: block;
   width: 100%;
-  margin-bottom: 12px;
+  margin-top: 8px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 1rem;
+  background: #fff;
+  color: var(--text);
+}
+
+.field ons-input {
+  padding: 0;
+  border: none;
+}
+
+.field ons-input .text-input {
+  width: 100%;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: var(--radius) !important;
+  padding: 12px 16px !important;
+  background: #fff !important;
+  font-size: 1rem !important;
+}
+
+.select-input {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* ボタン */
+.btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
   box-sizing: border-box;
 }
 
-.select-input {
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 15px;
+.btn + .btn {
+  margin-top: 10px;
 }
 
-.field-label {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin: 0 0 6px;
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--brand-orange-btn);
+  color: #fff;
+}
+
+.btn-line {
+  background: var(--line-green);
+  color: #fff;
+}
+
+.btn-outline {
+  background: #fff;
+  color: var(--brand-navy);
+  border: 1px solid #cbd5e1;
+}
+
+.stack {
+  margin-top: 20px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line-muted);
 }
 
 .error-text {
   color: var(--danger);
-  font-size: 13px;
-  margin-top: 10px;
+  font-size: 0.85rem;
+  margin-top: 12px;
   white-space: pre-wrap;
+  font-weight: 700;
 }
 
 .hint-text {
   color: var(--muted);
-  font-size: 13px;
-  margin-top: 10px;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  line-height: 1.5;
 }
 
-.stack-gap {
-  display: grid;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.btn-line {
-  background: var(--line) !important;
-  color: #fff !important;
-}
-
-.receipt-item {
+/* 履歴リスト（Webのレシート履歴カード） */
+.home-head {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
-  background: var(--card);
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 12px;
 }
 
-.receipt-item strong {
-  display: block;
+.home-head h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.home-head .sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.receipt-list {
+  display: grid;
+  gap: 10px;
+}
+
+.receipt-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.receipt-card:active {
+  transform: scale(0.99);
+}
+
+.receipt-card .name {
+  font-weight: 900;
+  font-size: 0.98rem;
+  color: var(--brand-navy);
+}
+
+.receipt-card .meta {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.receipt-card .right-col {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.receipt-card .status {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--brand-orange);
+  background: #ffedd5;
+  border-radius: 999px;
+  padding: 2px 8px;
   margin-bottom: 4px;
 }
 
-.receipt-meta {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.receipt-amount {
-  font-weight: 700;
-  white-space: nowrap;
+.receipt-card .amount {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--brand-navy);
 }
 
 .empty-box {
   text-align: center;
   color: var(--muted);
   padding: 48px 16px;
+  font-weight: 700;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
 }
 
+/* FAB */
+.fab-upload {
+  position: absolute;
+  right: 18px;
+  bottom: 24px;
+  z-index: 10;
+  background: var(--brand-orange-btn) !important;
+  color: #fff !important;
+}
+
+/* 詳細 */
+.detail-amount {
+  font-size: 1.75rem;
+  font-weight: 900;
+  margin: 8px 0 16px;
+  color: var(--brand-navy);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.detail-row .k {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.detail-row .v {
+  font-weight: 800;
+  text-align: right;
+}
+
+/* アップロード */
 .preview-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+  margin: 16px 0;
 }
 
 .preview-row img {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border-radius: 8px;
-  background: #ddd;
+  border-radius: 12px;
+  background: #e2e8f0;
 }
 
-.detail-amount {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin: 8px 0 12px;
+.boot-box {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  font-weight: 800;
 }
 
-.fab-upload {
-  position: absolute;
-  right: 18px;
-  bottom: 22px;
-  z-index: 10;
+.boot-box img {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
 }
