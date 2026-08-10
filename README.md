@@ -75,14 +75,18 @@ npm start
 
 ## Monaca での進め方（本番ルート）
 
-1. [Monaca](https://monaca.mobi/) にログイン
-2. **インポート** でこのリポジトリ（または zip）を取り込む  
-   - もしくはクラウドで「Onsen UI V2 JS Minimum」を作り、`www` を差し替える
-3. プラグインを確認 / 追加
+詳細は **`MONACA_SETUP.md`** を見ること。
+
+1. [Monaca](https://monaca.mobi/) で Onsen UI プロジェクトを用意し `www` を差し替え
+2. プラグインを有効化（**Advanced HTTP / File が必須**）
+   - `cordova-plugin-file`
+   - `cordova-plugin-advanced-http`
    - `cordova-plugin-camera`
    - `cordova-plugin-inappbrowser`
-4. **Monacaデバッガー** で実機確認（日本語UI）
-5. 必要ならクラウドで Android / iOS デバッグビルド
+3. **Monacaデバッガー** で確認（`nativeHttp= true` が出ること）
+4. 必要ならクラウドで Android / iOS デバッグビルド
+
+※ デバッガー origin `monaca-debugger://` は CORS で XHR が落ちるため、Advanced HTTP 必須。
 
 CLI を使う場合（要 Monaca アカウント）:
 

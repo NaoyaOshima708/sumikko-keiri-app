@@ -212,9 +212,12 @@
     const preview = page.querySelector('#previewRow');
     const sendBtn = page.querySelector('#sendBtn');
     preview.innerHTML = '';
-    state.pendingFiles.forEach(function (file) {
+    state.pendingFiles.forEach(function (item) {
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
+      const file = item && item.file ? item.file : item;
+      const path = item && item.path ? item.path : '';
+      if (file) img.src = URL.createObjectURL(file);
+      else if (path) img.src = path;
       img.alt = '';
       preview.appendChild(img);
     });
@@ -245,8 +248,8 @@
     refreshUploadUi(page);
   }
 
-  function addPendingFile(file, page) {
-    state.pendingFiles = state.pendingFiles.concat([file]).slice(0, 10);
+  function addPendingItem(item, page) {
+    state.pendingFiles = state.pendingFiles.concat([item]).slice(0, 10);
     page.querySelector('#uploadError').textContent = '';
     refreshUploadUi(page);
   }
@@ -266,12 +269,13 @@
   function pickWithCordova(sourceType, page) {
     navigator.camera.getPicture(
       function (uri) {
+        // ネイティブHTTP用に path を残す（CORS回避）
         uriToFile(uri)
           .then(function (file) {
-            addPendingFile(file, page);
+            addPendingItem({ file: file, path: uri }, page);
           })
-          .catch(function (e) {
-            page.querySelector('#uploadError').textContent = e.message || String(e);
+          .catch(function () {
+            addPendingItem({ path: uri }, page);
           });
       },
       function (message) {
@@ -295,7 +299,7 @@
     input.onchange = function () {
       const files = Array.prototype.slice.call(input.files || []);
       files.forEach(function (f) {
-        addPendingFile(f, page);
+        addPendingItem({ file: f }, page);
       });
     };
     input.click();
@@ -405,8 +409,12 @@
     if (page.id === 'homePage') loadHome(page);
   });
 
-  // Cordova でもブラウザでも、準備完了後に動かす
   ons.ready(function () {
-    // navigator の初期 page=boot.html が init を発火する
+    console.log(
+      'ons.ready nativeHttp=',
+      typeof SumikkoHasNativeHttp === 'function' ? SumikkoHasNativeHttp() : false,
+      'origin=',
+      location.origin
+    );
   });
 })();

@@ -93,60 +93,35 @@ www/
 
 ---
 
-## 5. 現状のブロッカー（最重要）
+## 5. 現状のブロッカーと対策
 
-### 症状
+### 症状（確認済み）
 
-Monacaデバッガーでログインすると失敗する。
+Monacaデバッガーでログイン失敗。origin は:
 
-### コンソールで確認済み
+`monaca-debugger://6a743d96e788851d02b4284a.monaca.io`
 
-```
-login start
-demo-app@sumikko-app.com
-origin= monaca-debugger://6a743d96e788851d02b4284a.monaca.io
-API通信失敗: Load failed / status=0（CORSまたは通信遮断）
-origin=monaca-debugger://6a743d96e788851d02b4284a.monaca.io
-api=https://receipt.sumikko-app.com/api
-login failed
-```
+XHR は CORS で `status=0` / `Load failed`。PC からの API ログインは成功。
 
-### 切り分け結果
+### アプリ側対策（実装済み・要 Monaca 反映）
 
-| 確認 | 結果 |
-|--|--|
-| PC から `POST /api/login`（上記アカウント） | **成功 200**（token 返却） |
-| `Origin: https://localhost` 等 | CORS 許可されるものあり |
-| `Origin: monaca-debugger://....monaca.io` の OPTIONS | **204 だが `Access-Control-Allow-Origin` が空 = 拒否** |
+`www/js/api.js` を **cordova-plugin-advanced-http** 対応にした。  
+デバッガー上ではネイティブHTTPで CORS を回避する。
 
-結論: **サーバは生きている。Monacaデバッガーのカスタムスキーム origin が Laravel CORS で許可されていない。**
+**必須プラグイン（Monacaで有効化）:**
 
-「Load failed」は Onsen の画面遷移失敗ではなく、**WebKit 系の XHR/fetch 通信失敗メッセージ**。
+- `cordova-plugin-file`
+- `cordova-plugin-advanced-http`
+- `cordova-plugin-camera`
+- `cordova-plugin-inappbrowser`
 
-### 必要な修正（Laravel 側）
+手順詳細: `MONACA_SETUP.md`
 
-`config/cors.php`（または同等）に例えば:
+Console で `ons.ready nativeHttp= true` が出ればプラグイン反映済み。`false` なら未設定。
 
-```php
-'allowed_origins_patterns' => [
-    '#^monaca-debugger://#',
-    '#^https?://.*\.monaca\.io$#',
-    '#^https?://.*\.monaca\.mobi$#',
-],
-```
+### Laravel CORS（任意・根本対応）
 
-その後:
-
-```bash
-cd /var/www/html/accounting.maspis.com
-php artisan config:clear
-```
-
-注意: `allowed_origins => ['*']` だけでは `monaca-debugger://` が通らないことがある。**patterns で明示が必要。**
-
-### 代替（アプリ側）
-
-`cordova-plugin-advanced-http` 等の **ネイティブ HTTP** に切り替えれば WebView CORS を回避できる場合がある。未実装。
+`monaca-debugger://` を `allowed_origins_patterns` に追加してもよい。アプリ側ネイティブHTTPがあればログインは通る想定。
 
 ---
 

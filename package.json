@@ -8,11 +8,15 @@
     "preview": "npx --yes serve www -p 8080"
   },
   "dependencies": {
+    "cordova-plugin-advanced-http": "^3.3.1",
     "cordova-plugin-camera": "^7.0.0",
+    "cordova-plugin-file": "^8.1.3",
     "cordova-plugin-inappbrowser": "^6.0.0"
   },
   "cordova": {
     "plugins": {
+      "cordova-plugin-file": {},
+      "cordova-plugin-advanced-http": {},
       "cordova-plugin-camera": {},
       "cordova-plugin-inappbrowser": {}
     }
