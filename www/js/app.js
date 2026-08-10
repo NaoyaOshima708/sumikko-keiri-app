@@ -368,7 +368,6 @@
       page.querySelector('#settingsBtn').onclick = function () {
         nav().pushPage('settings.html');
       };
-      page.querySelector('#homeLogoutBtn').onclick = onLogout;
       page.querySelector('#uploadFab').onclick = function () {
         nav().pushPage('upload.html');
       };
@@ -399,6 +398,7 @@
       page.querySelector('#saveKeyBtn').onclick = function () {
         saveKey(page);
       };
+      page.querySelector('#settingsLogoutBtn').onclick = onLogout;
       loadSettings(page);
     }
   });

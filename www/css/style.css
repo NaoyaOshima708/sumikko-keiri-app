@@ -33,6 +33,21 @@ ons-toolbar {
   border-bottom: 1px solid #ffedd5; /* orange-100 */
 }
 
+.toolbar__left,
+.toolbar__center,
+.toolbar__right {
+  overflow: hidden;
+}
+
+.toolbar__left {
+  max-width: 70%;
+}
+
+.toolbar__right {
+  max-width: 30%;
+  justify-content: flex-end;
+}
+
 ons-toolbar .center {
   font-weight: 900;
   color: var(--brand-navy);
@@ -41,7 +56,10 @@ ons-toolbar .center {
 ons-back-button,
 ons-toolbar-button {
   color: var(--brand-orange) !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
+  font-size: 0.9rem !important;
+  padding: 0 10px !important;
+  white-space: nowrap;
 }
 
 ons-page {
@@ -56,18 +74,35 @@ ons-page {
 .brand-mark {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1.125rem;
+  gap: 6px;
+  font-size: 1rem;
   font-weight: 900;
   letter-spacing: -0.02em;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.brand-mark-sm {
+  font-size: 0.95rem;
+  padding-left: 4px;
+}
+
+.brand-mark-lg {
+  font-size: 1.35rem;
 }
 
 .brand-mark img {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   object-fit: contain;
   background: #fff;
+  flex-shrink: 0;
+}
+
+.login-wrap {
+  padding-top: 28px;
 }
 
 .brand-mark .b-sumikko {
