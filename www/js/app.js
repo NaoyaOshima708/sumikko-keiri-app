@@ -178,17 +178,31 @@
     page.querySelector('#detailError').textContent = r.error_message || '';
   }
 
+  function settingsHasKey(settings) {
+    if (!settings) return false;
+    if (typeof settings.has_claude_api_key !== 'undefined') return !!settings.has_claude_api_key;
+    if (settings.data && typeof settings.data.has_claude_api_key !== 'undefined') {
+      return !!settings.data.has_claude_api_key;
+    }
+    return false;
+  }
+
   async function loadSettings(page) {
     const lead = page.querySelector('#settingsLead');
     const hint = page.querySelector('#settingsHint');
     const err = page.querySelector('#settingsError');
-    hint.textContent = '';
     err.textContent = '';
     try {
       state.settings = await SumikkoApi.settings();
-      lead.textContent =
-        'Claude APIキー ' + (state.settings.has_claude_api_key ? '（登録済み）' : '（未登録）');
+      const registered = settingsHasKey(state.settings);
+      lead.textContent = registered
+        ? '解析に使うAPIキーは登録済みです。変更する場合は新しいキーを入力して保存してください。'
+        : '解析に使うAPIキーを登録します。（まだ未登録）';
+      if (registered && !hint.textContent) {
+        hint.textContent = '登録済み';
+      }
     } catch (e) {
+      console.error('settings load failed', e);
       err.textContent = e.message || String(e);
     }
   }
@@ -197,13 +211,27 @@
     const key = inputValue(page, '#apiKeyInput').trim();
     const hint = page.querySelector('#settingsHint');
     const err = page.querySelector('#settingsError');
+    const lead = page.querySelector('#settingsLead');
     hint.textContent = '';
     err.textContent = '';
+    if (!key) {
+      err.textContent = 'APIキーを入力してください';
+      return;
+    }
     try {
+      console.log('saveApiKey start len=', key.length);
       const res = await SumikkoApi.saveApiKey(key);
-      hint.textContent = res.message || '保存しました';
+      console.log('saveApiKey ok', res);
+      const registered = !!(res && (res.has_claude_api_key || settingsHasKey(res)));
+      hint.textContent = (res && res.message) || '保存しました';
+      if (registered) {
+        lead.textContent =
+          '解析に使うAPIキーは登録済みです。変更する場合は新しいキーを入力して保存してください。';
+      }
+      page.querySelector('#apiKeyInput').value = '';
       await loadSettings(page);
     } catch (e) {
+      console.error('saveApiKey failed', e && e.message, e);
       err.textContent = e.message || String(e);
     }
   }

@@ -35,12 +35,13 @@
     return err;
   }
 
-  function parseBody(text) {
-    if (!text) return null;
+  function parseBody(data) {
+    if (data == null || data === '') return null;
+    if (typeof data === 'object') return data;
     try {
-      return JSON.parse(text);
+      return JSON.parse(data);
     } catch (e) {
-      return { message: text };
+      return { message: String(data) };
     }
   }
 
@@ -58,23 +59,22 @@
     reject(err);
   }
 
-  /** Monacaデバッガーは monaca-debugger:// のため CORS で XHR が落ちる。ネイティブHTTPで回避 */
   function requestNative(path, options) {
     options = options || {};
     const http = cordova.plugin.http;
     const url = config.apiBase + path;
     const method = (options.method || 'get').toLowerCase();
-    const headers = buildHeaders(options.headers);
+    const headers = buildHeaders(options.headers || {});
+
+    // json serializer が Content-Type を付けるので二重指定しない
+    delete headers['Content-Type'];
+    delete headers['content-type'];
 
     return new Promise(function (resolve, reject) {
       try {
-        const req = {
-          method: method,
-          headers: headers,
-        };
+        const req = { method: method, headers: headers };
 
         if (options.formData) {
-          // multipart: { fields: {model:'...'}, files: { 'images[]': ['file:///...'] } }
           http.setDataSerializer('multipart');
           req.data = options.formData.fields || {};
           if (options.formData.files) req.files = options.formData.files;
@@ -100,12 +100,13 @@
           },
           function (response) {
             const status = (response && response.status) || 0;
-            const body = parseBody(response && response.error ? response.error : response && response.data);
+            const raw = response && (response.error || response.data);
+            const body = parseBody(raw);
             if (status === 0) {
               reject(networkError(new Error((response && response.error) || 'native http status=0')));
               return;
             }
-            rejectHttp(status, body || { message: (response && response.error) || 'リクエストに失敗しました' }, reject);
+            rejectHttp(status, body || { message: String(raw || 'リクエストに失敗しました') }, reject);
           }
         );
       } catch (e) {
@@ -116,7 +117,7 @@
 
   function requestXhr(path, options) {
     options = options || {};
-    const headers = buildHeaders(options.headers);
+    const headers = buildHeaders(options.headers || {});
     const url = config.apiBase + path;
     const method = (options.method || 'GET').toUpperCase();
 
@@ -125,7 +126,6 @@
         const xhr = new XMLHttpRequest();
         xhr.open(method, url, true);
         Object.keys(headers).forEach(function (key) {
-          // FormData のときは Content-Type を手動設定しない
           if (options.body instanceof FormData && key.toLowerCase() === 'content-type') return;
           xhr.setRequestHeader(key, headers[key]);
         });
@@ -152,78 +152,67 @@
     });
   }
 
-  function request(path, options) {
-    options = options || {};
-    if (hasNativeHttp() && !options.forceXhr) {
-      if (options.body instanceof FormData) {
-        // FormData はネイティブ側では使えないので呼び出し側で formData を渡す
-        return requestXhr(path, options);
-      }
-      return requestNative(path, options);
-    }
-    return requestXhr(path, options);
+  /**
+   * CORS 通過後は XHR 優先。失敗時だけネイティブHTTPへ。
+   * （advanced-http の PUT が環境によって壊れる対策）
+   */
+  function jsonRequest(method, path, jsonData) {
+    const upper = method.toUpperCase();
+    const xhrOpts = {
+      method: upper,
+      headers: { 'Content-Type': 'application/json' },
+      body: jsonData != null ? JSON.stringify(jsonData) : null,
+    };
+
+    return requestXhr(path, xhrOpts).catch(function (err) {
+      if (!err.isNetwork || !hasNativeHttp()) throw err;
+      console.warn('XHR failed, fallback native', upper, path, err.message);
+      return requestNative(path, {
+        method: upper.toLowerCase(),
+        json: jsonData != null ? jsonData : {},
+      });
+    });
+  }
+
+  function getRequest(path) {
+    return requestXhr(path, { method: 'GET' }).catch(function (err) {
+      if (!err.isNetwork || !hasNativeHttp()) throw err;
+      console.warn('XHR failed, fallback native GET', path, err.message);
+      return requestNative(path, { method: 'get' });
+    });
   }
 
   const SumikkoApi = {
     login: function (email, password) {
-      const payload = { email: email, password: password, device_name: 'monaca' };
-      if (hasNativeHttp()) {
-        return requestNative('/login', {
-          method: 'post',
-          headers: { 'Content-Type': 'application/json' },
-          json: payload,
-        });
-      }
-      return requestXhr('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      return jsonRequest('POST', '/login', {
+        email: email,
+        password: password,
+        device_name: 'monaca',
       });
     },
     me: function () {
-      if (hasNativeHttp()) return requestNative('/me', { method: 'get' });
-      return requestXhr('/me', { method: 'GET' });
+      return getRequest('/me');
     },
     logout: async function () {
       try {
-        if (hasNativeHttp()) await requestNative('/logout', { method: 'post', json: {} });
-        else await requestXhr('/logout', { method: 'POST' });
+        await jsonRequest('POST', '/logout', {});
       } finally {
         setToken('');
       }
     },
     receipts: function (month) {
       const q = month ? '?month=' + encodeURIComponent(month) : '';
-      if (hasNativeHttp()) return requestNative('/receipts' + q, { method: 'get' });
-      return requestXhr('/receipts' + q, { method: 'GET' });
+      return getRequest('/receipts' + q);
     },
     receipt: function (id) {
-      if (hasNativeHttp()) return requestNative('/receipts/' + id, { method: 'get' });
-      return requestXhr('/receipts/' + id, { method: 'GET' });
+      return getRequest('/receipts/' + id);
     },
     settings: function () {
-      if (hasNativeHttp()) return requestNative('/settings', { method: 'get' });
-      return requestXhr('/settings', { method: 'GET' });
+      return getRequest('/settings');
     },
     saveApiKey: function (claude_api_key) {
-      const payload = { claude_api_key: claude_api_key };
-      if (hasNativeHttp()) {
-        return requestNative('/settings/api-key', {
-          method: 'put',
-          headers: { 'Content-Type': 'application/json' },
-          json: payload,
-        });
-      }
-      return requestXhr('/settings/api-key', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      return jsonRequest('PUT', '/settings/api-key', { claude_api_key: claude_api_key });
     },
-    /**
-     * files: File[] または { file?: File, path?: string }[]
-     * Monaca実機/デバッガーでは path (file URI) を優先してネイティブアップロード
-     */
     uploadReceipts: function (files, model) {
       const items = (files || []).map(function (f) {
         if (f && (f.path || f.file)) return f;
