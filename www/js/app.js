@@ -4,6 +4,7 @@
     settings: null,
     pendingFiles: [],
     detail: null,
+    historyMonth: null, // 'YYYY-MM'（Web版の対象月と同じ）
   };
 
   function nav() {
@@ -12,6 +13,19 @@
 
   function monthNow() {
     const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+
+  // Web版 Format::monthJa 相当
+  function formatMonthJa(month) {
+    if (!month || !/^\d{4}-\d{2}$/.test(month)) return '全期間';
+    const parts = month.split('-');
+    return parts[0] + '年' + parts[1] + '月';
+  }
+
+  function shiftMonth(ym, delta) {
+    const parts = String(ym || monthNow()).split('-');
+    const d = new Date(Number(parts[0]), Number(parts[1]) - 1 + delta, 1);
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
   }
 
@@ -36,31 +50,21 @@
   }
 
   function receiptSortDate(r) {
-    return r && (r.purchased_at || r.created_at) || '';
+    return (r && (r.purchased_at || r.created_at)) || '';
   }
 
-  function isWithinPastYear(r) {
-    const raw = receiptSortDate(r);
-    if (!raw) return true;
-    const t = Date.parse(raw);
-    if (isNaN(t)) return true;
-    const cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - 1);
-    return t >= cutoff.getTime();
-  }
-
-  // APIは month=（空）で全期間。過去1年分に絞って返す
-  async function fetchReceiptsPastYear() {
+  // Web版どおり対象月で取得（レシート日付基準。ページネーションも追従）
+  async function fetchReceiptsForMonth(month) {
     const byId = {};
     let page = 1;
     let lastPage = 1;
     const maxPages = 60;
 
     do {
-      const res = await SumikkoApi.receipts({ month: '', page: page });
+      const res = await SumikkoApi.receipts({ month: month, page: page });
       const items = res.data || [];
       items.forEach(function (r) {
-        if (r && r.id != null && isWithinPastYear(r)) byId[r.id] = r;
+        if (r && r.id != null) byId[r.id] = r;
       });
       lastPage = (res.meta && res.meta.last_page) || 1;
       page += 1;
@@ -166,16 +170,30 @@
     }
   }
 
+  function syncMonthControls(page) {
+    if (!state.historyMonth) state.historyMonth = monthNow();
+    const label = page.querySelector('#monthLabel');
+    const prevBtn = page.querySelector('#monthPrevBtn');
+    const nextBtn = page.querySelector('#monthNextBtn');
+    if (label) label.textContent = formatMonthJa(state.historyMonth);
+    if (nextBtn) nextBtn.disabled = state.historyMonth >= monthNow();
+    if (prevBtn) prevBtn.disabled = false;
+  }
+
   async function loadHome(page) {
     const list = page.querySelector('#receiptList');
     const empty = page.querySelector('#homeEmpty');
     const lead = page.querySelector('#homeLead');
-    lead.textContent = '過去1年分 ／ 右下の＋から撮影';
+    if (!state.historyMonth) state.historyMonth = monthNow();
+    syncMonthControls(page);
+    if (lead) {
+      lead.textContent = 'レシート日付基準 ／ 右下の＋から撮影';
+    }
     list.innerHTML = '';
     empty.style.display = 'none';
 
     try {
-      const items = await fetchReceiptsPastYear();
+      const items = await fetchReceiptsForMonth(state.historyMonth);
       if (!items.length) {
         empty.style.display = 'block';
         return;
@@ -489,11 +507,22 @@
     }
 
     if (page.id === 'homePage') {
+      if (!state.historyMonth) state.historyMonth = monthNow();
       page.querySelector('#settingsBtn').onclick = function () {
         nav().pushPage('settings.html');
       };
       page.querySelector('#uploadFab').onclick = function () {
         nav().pushPage('upload.html');
+      };
+      page.querySelector('#monthPrevBtn').onclick = function () {
+        state.historyMonth = shiftMonth(state.historyMonth || monthNow(), -1);
+        loadHome(page);
+      };
+      page.querySelector('#monthNextBtn').onclick = function () {
+        const next = shiftMonth(state.historyMonth || monthNow(), 1);
+        if (next > monthNow()) return;
+        state.historyMonth = next;
+        loadHome(page);
       };
       loadHome(page);
       return;

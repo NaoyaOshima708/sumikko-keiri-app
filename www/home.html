@@ -10,12 +10,17 @@
   <div class="wrap">
     <div class="home-head">
       <h1>レシート履歴</h1>
-      <p class="sub" id="homeLead">過去1年分</p>
+      <div class="month-bar">
+        <button type="button" class="month-nav" id="monthPrevBtn" aria-label="前の月">‹</button>
+        <div class="month-label" id="monthLabel">----年--月</div>
+        <button type="button" class="month-nav" id="monthNextBtn" aria-label="次の月">›</button>
+      </div>
+      <p class="sub" id="homeLead">レシート日付基準 ／ 右下の＋から撮影</p>
     </div>
     <div class="receipt-list" id="receiptList"></div>
     <div class="empty-box" id="homeEmpty" style="display:none">
-      過去1年分の領収書はまだありません
-      <span class="empty-hint">右下の ＋ から撮影できます</span>
+      この月の領収書はまだありません
+      <span class="empty-hint">‹ › で月を切り替えられます</span>
     </div>
   </div>
 
