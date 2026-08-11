@@ -399,6 +399,22 @@ ons-page {
   margin-bottom: 4px;
 }
 
+.receipt-card .status-processing,
+.receipt-card .status-pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.receipt-card .status-completed {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.receipt-card .status-failed {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
 .receipt-card .amount {
   font-size: 1.05rem;
   font-weight: 900;

@@ -23,6 +23,58 @@
       .replace(/"/g, '&quot;');
   }
 
+  // Web版と同じラベル
+  function statusLabel(status) {
+    const map = {
+      pending: '解析待ち',
+      processing: '解析中',
+      completed: '解析完了',
+      failed: '解析失敗',
+    };
+    const key = String(status || '').toLowerCase();
+    return map[key] || status || '-';
+  }
+
+  function receiptSortDate(r) {
+    return r && (r.purchased_at || r.created_at) || '';
+  }
+
+  function isWithinPastYear(r) {
+    const raw = receiptSortDate(r);
+    if (!raw) return true;
+    const t = Date.parse(raw);
+    if (isNaN(t)) return true;
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 1);
+    return t >= cutoff.getTime();
+  }
+
+  // APIは month=（空）で全期間。過去1年分に絞って返す
+  async function fetchReceiptsPastYear() {
+    const byId = {};
+    let page = 1;
+    let lastPage = 1;
+    const maxPages = 60;
+
+    do {
+      const res = await SumikkoApi.receipts({ month: '', page: page });
+      const items = res.data || [];
+      items.forEach(function (r) {
+        if (r && r.id != null && isWithinPastYear(r)) byId[r.id] = r;
+      });
+      lastPage = (res.meta && res.meta.last_page) || 1;
+      page += 1;
+    } while (page <= lastPage && page <= maxPages);
+
+    return Object.keys(byId)
+      .map(function (id) {
+        return byId[id];
+      })
+      .sort(function (a, b) {
+        return String(receiptSortDate(b)).localeCompare(String(receiptSortDate(a)));
+      });
+  }
+
   function openExternal(url) {
     if (window.cordova && cordova.InAppBrowser) {
       cordova.InAppBrowser.open(url, '_system');
@@ -118,13 +170,12 @@
     const list = page.querySelector('#receiptList');
     const empty = page.querySelector('#homeEmpty');
     const lead = page.querySelector('#homeLead');
-    lead.textContent = monthNow().replace('-', '/') + ' ／ 右下の＋から撮影';
+    lead.textContent = '過去1年分 ／ 右下の＋から撮影';
     list.innerHTML = '';
     empty.style.display = 'none';
 
     try {
-      const res = await SumikkoApi.receipts(monthNow());
-      const items = res.data || [];
+      const items = await fetchReceiptsPastYear();
       if (!items.length) {
         empty.style.display = 'block';
         return;
@@ -132,14 +183,17 @@
       items.forEach(function (r) {
         const el = document.createElement('div');
         el.className = 'receipt-card';
+        const statusKey = String(r.status || '').toLowerCase();
         el.innerHTML =
           '<div class="left-col">' +
           '<div class="name">' + escapeHtml(r.merchant_name || '（店舗名なし）') + '</div>' +
           '<div class="meta">' +
-          escapeHtml((r.purchased_at || '').slice(0, 16).replace('T', ' ') || '-') +
+          escapeHtml((r.purchased_at || r.created_at || '').slice(0, 16).replace('T', ' ') || '-') +
           '</div></div>' +
           '<div class="right-col">' +
-          '<div class="status">' + escapeHtml(r.status || '-') + '</div>' +
+          '<div class="status status-' + escapeHtml(statusKey) + '">' +
+          escapeHtml(statusLabel(r.status)) +
+          '</div>' +
           '<div class="amount">' +
           (r.total_amount != null ? '¥' + Number(r.total_amount).toLocaleString() : '-') +
           '</div></div>';
@@ -174,7 +228,7 @@
       (r.purchased_at || '').slice(0, 16).replace('T', ' ') || '-';
     page.querySelector('#detailAmount').textContent =
       r.total_amount != null ? '¥' + Number(r.total_amount).toLocaleString() : '-';
-    page.querySelector('#detailStatus').textContent = r.status || '-';
+    page.querySelector('#detailStatus').textContent = statusLabel(r.status);
     page.querySelector('#detailError').textContent = r.error_message || '';
   }
 

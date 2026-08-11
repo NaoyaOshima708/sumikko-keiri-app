@@ -202,8 +202,25 @@
         setToken('');
       }
     },
-    receipts: function (month) {
-      const q = month ? '?month=' + encodeURIComponent(month) : '';
+    // month: 'YYYY-MM' / ''（空文字＝全期間） / 省略時はAPI既定（当月）
+    // page: ページ番号（1始まり）
+    receipts: function (monthOrOpts, page) {
+      let month;
+      let pageNum = page;
+      if (monthOrOpts && typeof monthOrOpts === 'object') {
+        month = monthOrOpts.month;
+        pageNum = monthOrOpts.page;
+      } else {
+        month = monthOrOpts;
+      }
+      const params = [];
+      if (typeof month === 'string') {
+        params.push('month=' + encodeURIComponent(month));
+      }
+      if (pageNum) {
+        params.push('page=' + encodeURIComponent(pageNum));
+      }
+      const q = params.length ? '?' + params.join('&') : '';
       return getRequest('/receipts' + q);
     },
     receipt: function (id) {
