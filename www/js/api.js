@@ -226,6 +226,13 @@
     receipt: function (id) {
       return getRequest('/receipts/' + id);
     },
+    // Web版 PATCH /receipts/{id} と同じ項目
+    updateReceipt: function (id, payload) {
+      return jsonRequest('PATCH', '/receipts/' + id, payload);
+    },
+    retryReceipt: function (id) {
+      return jsonRequest('POST', '/receipts/' + id + '/retry', {});
+    },
     settings: function () {
       return getRequest('/settings');
     },

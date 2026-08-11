@@ -1,17 +1,62 @@
 <ons-page id="detailPage">
   <div class="app-header">
     <button type="button" class="app-header-link" id="detailBackBtn">← 戻る</button>
-    <div class="app-header-center">読み取り内容</div>
+    <div class="app-header-center">レシート詳細</div>
     <div class="app-header-spacer"></div>
   </div>
 
   <div class="wrap">
+    <div class="analyze-banner" id="detailAnalyzeBanner" style="display:none"></div>
+
+    <div class="card detail-image-card" id="detailImageWrap" style="display:none">
+      <img id="detailImage" class="detail-image" alt="レシート画像">
+    </div>
+
     <div class="card">
-      <h1 class="page-title" id="detailTitle">（店舗名なし）</h1>
-      <p class="detail-amount" id="detailAmount">-</p>
-      <div class="detail-row"><span class="k">日付</span><span class="v" id="detailDate">-</span></div>
-      <div class="detail-row"><span class="k">状態</span><span class="v" id="detailStatus">-</span></div>
+      <h1 class="page-title">レシート情報</h1>
+      <p class="lead">解析結果を確認・修正して保存できます。</p>
+
+      <label class="field">店舗名
+        <input id="detailMerchant" type="text" autocomplete="off">
+      </label>
+      <label class="field">購入日時
+        <input id="detailPurchasedAt" type="datetime-local">
+      </label>
+      <label class="field">合計（日本円）
+        <input id="detailTotalAmount" type="number" inputmode="decimal" min="0" step="1">
+      </label>
+      <label class="field">税額（日本円）
+        <input id="detailTaxAmount" type="number" inputmode="decimal" min="0" step="1">
+      </label>
+      <label class="field">通貨
+        <input id="detailCurrency" type="text" maxlength="3" autocomplete="off">
+      </label>
+      <label class="field">登録番号
+        <input id="detailRegNumber" type="text" autocomplete="off">
+      </label>
+
+      <div class="stack">
+        <button type="button" class="btn btn-primary" id="detailSaveBtn">変更を保存</button>
+      </div>
+      <p class="hint-text" id="detailHint"></p>
       <p class="error-text" id="detailError"></p>
+    </div>
+
+    <div class="card" id="detailFailedCard" style="display:none; margin-top:12px">
+      <h2 class="section-label">解析エラー</h2>
+      <p class="error-text" id="detailFailedMessage"></p>
+      <button type="button" class="btn btn-outline" id="detailRetryBtn">再解析する</button>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2 class="section-label">その他の解析情報</h2>
+      <div class="detail-row"><span class="k">支払方法</span><span class="v" id="detailPayment">—</span></div>
+      <div class="detail-row"><span class="k">レシート番号</span><span class="v" id="detailReceiptNo">—</span></div>
+      <div class="detail-row"><span class="k">解析ステータス</span><span class="v" id="detailStatus">—</span></div>
+      <div class="detail-raw-wrap">
+        <div class="k">全文</div>
+        <pre class="detail-raw" id="detailRawText">全文データはありません。</pre>
+      </div>
     </div>
   </div>
 </ons-page>

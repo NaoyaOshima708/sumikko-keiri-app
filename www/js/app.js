@@ -229,6 +229,81 @@
     }
   }
 
+  let detailPollTimer = null;
+  let detailImageObjectUrl = null;
+
+  function clearDetailPoll() {
+    if (detailPollTimer) {
+      clearTimeout(detailPollTimer);
+      detailPollTimer = null;
+    }
+  }
+
+  function revokeDetailImage() {
+    if (detailImageObjectUrl) {
+      try {
+        URL.revokeObjectURL(detailImageObjectUrl);
+      } catch (e) {}
+      detailImageObjectUrl = null;
+    }
+  }
+
+  function pad2(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  // datetime-local 用（端末ローカル時刻）
+  function toDatetimeLocalValue(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (!isNaN(d.getTime())) {
+      return (
+        d.getFullYear() +
+        '-' +
+        pad2(d.getMonth() + 1) +
+        '-' +
+        pad2(d.getDate()) +
+        'T' +
+        pad2(d.getHours()) +
+        ':' +
+        pad2(d.getMinutes())
+      );
+    }
+    const s = String(iso).trim();
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s)) {
+      return s.slice(0, 16).replace(' ', 'T');
+    }
+    return '';
+  }
+
+  function fromDatetimeLocalValue(v) {
+    if (!v) return null;
+    const s = String(v).trim();
+    if (s.length === 16) return s.replace('T', ' ') + ':00';
+    return s.replace('T', ' ');
+  }
+
+  function amountInputValue(v) {
+    if (v == null || v === '') return '';
+    const n = Number(v);
+    return isNaN(n) ? '' : String(Math.round(n));
+  }
+
+  function parseOptionalAmount(v) {
+    const s = String(v == null ? '' : v).trim();
+    if (!s) return null;
+    const n = Number(s);
+    if (isNaN(n) || n < 0) throw new Error('金額の形式が正しくありません');
+    return n;
+  }
+
+  function rawTextOf(r) {
+    if (!r) return '';
+    if (r.raw_text) return r.raw_text;
+    if (r.analysis_json && r.analysis_json.raw_text) return r.analysis_json.raw_text;
+    return '';
+  }
+
   async function openDetail(id) {
     try {
       const res = await SumikkoApi.receipt(id);
@@ -239,15 +314,176 @@
     }
   }
 
+  function loadDetailImage(page, r) {
+    const wrap = page.querySelector('#detailImageWrap');
+    const img = page.querySelector('#detailImage');
+    revokeDetailImage();
+    if (!wrap || !img || !r || !r.image_url) {
+      if (wrap) wrap.style.display = 'none';
+      return;
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', r.image_url, true);
+    xhr.responseType = 'blob';
+    const token = typeof getToken === 'function' ? getToken() : '';
+    if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+    xhr.setRequestHeader('Accept', 'image/*,*/*');
+    xhr.onload = function () {
+      if (xhr.status < 200 || xhr.status >= 300 || !xhr.response) {
+        wrap.style.display = 'none';
+        return;
+      }
+      detailImageObjectUrl = URL.createObjectURL(xhr.response);
+      img.src = detailImageObjectUrl;
+      wrap.style.display = 'block';
+    };
+    xhr.onerror = function () {
+      wrap.style.display = 'none';
+    };
+    xhr.send();
+  }
+
+  function scheduleDetailPoll(page) {
+    clearDetailPoll();
+    const r = state.detail;
+    if (!r || (r.status !== 'pending' && r.status !== 'processing')) return;
+    detailPollTimer = setTimeout(async function () {
+      try {
+        const res = await SumikkoApi.receipt(r.id);
+        state.detail = res.data;
+        fillDetail(page);
+        scheduleDetailPoll(page);
+      } catch (e) {
+        console.warn('detail poll failed', e);
+      }
+    }, 3000);
+  }
+
   function fillDetail(page) {
     const r = state.detail || {};
-    page.querySelector('#detailTitle').textContent = r.merchant_name || '（店舗名なし）';
-    page.querySelector('#detailDate').textContent =
-      (r.purchased_at || '').slice(0, 16).replace('T', ' ') || '-';
-    page.querySelector('#detailAmount').textContent =
-      r.total_amount != null ? '¥' + Number(r.total_amount).toLocaleString() : '-';
-    page.querySelector('#detailStatus').textContent = statusLabel(r.status);
-    page.querySelector('#detailError').textContent = r.error_message || '';
+    const hint = page.querySelector('#detailHint');
+    const err = page.querySelector('#detailError');
+    if (hint) hint.textContent = '';
+    if (err) err.textContent = '';
+
+    const setVal = function (sel, val) {
+      const el = page.querySelector(sel);
+      if (el) el.value = val == null ? '' : String(val);
+    };
+
+    setVal('#detailMerchant', r.merchant_name || '');
+    setVal('#detailPurchasedAt', toDatetimeLocalValue(r.purchased_at));
+    setVal('#detailTotalAmount', amountInputValue(r.total_amount));
+    setVal('#detailTaxAmount', amountInputValue(r.tax_amount));
+    setVal('#detailCurrency', (r.currency || 'JPY').toUpperCase());
+    setVal('#detailRegNumber', r.registration_number || '');
+
+    const payment = page.querySelector('#detailPayment');
+    const receiptNo = page.querySelector('#detailReceiptNo');
+    const statusEl = page.querySelector('#detailStatus');
+    const rawEl = page.querySelector('#detailRawText');
+    if (payment) payment.textContent = r.payment_method || '—';
+    if (receiptNo) receiptNo.textContent = r.receipt_number || '—';
+    if (statusEl) statusEl.textContent = statusLabel(r.status);
+    if (rawEl) rawEl.textContent = rawTextOf(r) || '全文データはありません。';
+
+    const banner = page.querySelector('#detailAnalyzeBanner');
+    if (banner) {
+      if (r.status === 'pending' || r.status === 'processing') {
+        banner.style.display = 'block';
+        banner.textContent =
+          (r.status === 'pending' ? '解析待ちです。' : 'レシートを解析中です。') +
+          '完了すると自動的に表示を更新します。';
+      } else {
+        banner.style.display = 'none';
+        banner.textContent = '';
+      }
+    }
+
+    const failedCard = page.querySelector('#detailFailedCard');
+    const failedMsg = page.querySelector('#detailFailedMessage');
+    if (failedCard) {
+      if (r.status === 'failed') {
+        failedCard.style.display = 'block';
+        if (failedMsg) failedMsg.textContent = r.error_message || '解析に失敗しました。';
+      } else {
+        failedCard.style.display = 'none';
+      }
+    }
+
+    loadDetailImage(page, r);
+    scheduleDetailPoll(page);
+  }
+
+  async function saveDetail(page) {
+    const r = state.detail || {};
+    const hint = page.querySelector('#detailHint');
+    const err = page.querySelector('#detailError');
+    const btn = page.querySelector('#detailSaveBtn');
+    if (hint) hint.textContent = '';
+    if (err) err.textContent = '';
+    if (!r.id) {
+      if (err) err.textContent = 'レシート情報を読み込めませんでした。';
+      return;
+    }
+
+    let totalAmount;
+    let taxAmount;
+    try {
+      totalAmount = parseOptionalAmount(inputValue(page, '#detailTotalAmount'));
+      taxAmount = parseOptionalAmount(inputValue(page, '#detailTaxAmount'));
+    } catch (e) {
+      if (err) err.textContent = e.message || String(e);
+      return;
+    }
+
+    const currency = String(inputValue(page, '#detailCurrency') || 'JPY')
+      .trim()
+      .toUpperCase();
+    if (!/^[A-Z]{3}$/.test(currency)) {
+      if (err) err.textContent = '通貨は3文字の英字で入力してください（例: JPY）';
+      return;
+    }
+
+    const payload = {
+      merchant_name: String(inputValue(page, '#detailMerchant') || '').trim() || null,
+      purchased_at: fromDatetimeLocalValue(inputValue(page, '#detailPurchasedAt')),
+      total_amount: totalAmount,
+      tax_amount: taxAmount,
+      currency: currency,
+      registration_number: String(inputValue(page, '#detailRegNumber') || '').trim() || null,
+    };
+
+    if (btn) btn.disabled = true;
+    try {
+      const res = await SumikkoApi.updateReceipt(r.id, payload);
+      state.detail = res.data || state.detail;
+      fillDetail(page);
+      if (hint) hint.textContent = (res && res.message) || '更新しました。';
+    } catch (e) {
+      console.error('saveDetail failed', e);
+      if (err) err.textContent = e.message || String(e);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function retryDetail(page) {
+    const r = state.detail || {};
+    const err = page.querySelector('#detailError');
+    const hint = page.querySelector('#detailHint');
+    if (err) err.textContent = '';
+    if (!r.id) return;
+    try {
+      const res = await SumikkoApi.retryReceipt(r.id);
+      if (hint) hint.textContent = (res && res.message) || '解析を受け付けました。';
+      const fresh = await SumikkoApi.receipt(r.id);
+      state.detail = fresh.data;
+      fillDetail(page);
+    } catch (e) {
+      if (err) err.textContent = e.message || String(e);
+    }
   }
 
   function settingsHasKey(settings) {
@@ -547,8 +783,19 @@
 
     if (page.id === 'detailPage') {
       page.querySelector('#detailBackBtn').onclick = function () {
+        clearDetailPoll();
+        revokeDetailImage();
         nav().popPage();
       };
+      page.querySelector('#detailSaveBtn').onclick = function () {
+        saveDetail(page);
+      };
+      const retryBtn = page.querySelector('#detailRetryBtn');
+      if (retryBtn) {
+        retryBtn.onclick = function () {
+          retryDetail(page);
+        };
+      }
       fillDetail(page);
       return;
     }
@@ -569,6 +816,13 @@
   document.addEventListener('show', function (event) {
     const page = event.target;
     if (page.id === 'homePage') loadHome(page);
+  });
+
+  document.addEventListener('hide', function (event) {
+    if (event.target.id === 'detailPage') {
+      clearDetailPoll();
+      revokeDetailImage();
+    }
   });
 
   ons.ready(function () {

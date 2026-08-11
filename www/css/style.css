@@ -496,6 +496,58 @@ ons-page {
 .detail-row .v {
   font-weight: 800;
   text-align: right;
+  word-break: break-all;
+}
+
+.analyze-banner {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.detail-image-card {
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.detail-image {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.detail-raw-wrap {
+  margin-top: 12px;
+  padding-top: 4px;
+}
+
+.detail-raw-wrap .k {
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.detail-raw {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--text);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow: auto;
 }
 
 /* アップロード */
