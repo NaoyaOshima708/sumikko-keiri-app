@@ -1,5 +1,8 @@
 # Monaca で動かす手順（最初からこれだけで完結）
 
+**どこに何を置くか:** 必ず先に [WHERE_TO_DEPLOY.md](./WHERE_TO_DEPLOY.md) を見る。  
+（`www/` = Monaca / `server-api/` = サーバーPHP。混ぜない）
+
 Monacaデバッガーの origin は `monaca-debugger://...` のため、通常の XHR は Laravel CORS で落ちます。  
 対策は次の **どちらか一方** です。
 

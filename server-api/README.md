@@ -1,7 +1,12 @@
 # server-api（Laravel API の控え）
 
+**このフォルダは Monaca に上げない。**  
+置き場所の正本はリポジトリ直下の [WHERE_TO_DEPLOY.md](../WHERE_TO_DEPLOY.md)。
+
+---
+
 Monaca アプリ（`www/`）とは別物です。  
-削除・CSV出力のために **本番サーバーへ直接反映した PHP** の控えをここに置いています。
+削除・CSV出力のために **本番サーバーへ反映する PHP** の控えです。
 
 ## 本番の実体
 
@@ -22,4 +27,4 @@ Laravel ルート: `/var/www/html/accounting.maspis.com`
 
 - GitHub の `sumikko-app`（Web）公開ブランチには `routes/api.php` / `Api\` が無いことがあります（本番だけにある構成）。
 - Monaca にアップロードするのは `www/` だけ。`server-api/` は上げない。
-- 本番反映後は `php artisan route:clear` を実行済み。
+- 本番反映後は `php artisan route:clear` を実行する。

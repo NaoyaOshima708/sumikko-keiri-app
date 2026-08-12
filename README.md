@@ -3,6 +3,15 @@
 領収書撮影 → Claude OCR →（任意で仕訳）→ Googleスプレッドシート同期向けのモバイルアプリです。  
 **Capacitor から Monaca（Cordova）+ Onsen UI に切り替えました。**
 
+## まずこれ（どこに何を置くか）
+
+**[WHERE_TO_DEPLOY.md](./WHERE_TO_DEPLOY.md)** を見てください。
+
+- `www/` → **Monaca**
+- `server-api/`（PHP） → **Laravel 本番サーバー**（Monaca には上げない）
+
+---
+
 ## なぜこの構成か
 
 - 日本語のドキュメント / IDE（Monaca）で進めやすい

@@ -1,9 +1,23 @@
 # すみっこ経理アプリ — 引継ぎ資料
 
-最終更新: 2026-08-10  
+最終更新: 2026-08-12  
 ローカルパス: `C:\work\sumikko-keiri-app\sumikko-keiri-app`  
 GitHub: https://github.com/NaoyaOshima708/sumikko-keiri-app  
-※ Monaca化の変更は **まだ commit / push していない可能性が高い**（作業ツリーにローカル変更あり）
+
+---
+
+## 0. どこに何を置くか（必読）
+
+**迷ったら [WHERE_TO_DEPLOY.md](./WHERE_TO_DEPLOY.md) だけ見る。**
+
+| 場所 | 置くもの |
+|--|--|
+| **Monaca** | `www/` 配下（html / css / js / img） |
+| **Laravel サーバー** | `server-api/` に控えた PHP → 本番は `/var/www/html/accounting.maspis.com/` |
+| ドキュメント | `WHERE_TO_DEPLOY.md` / `HANDOFF.md` / `README.md`（アプリには上げない） |
+
+- Monaca に PHP（`server-api/`）は上げない
+- サーバー作業と Monaca アップロードは別物。チャットでも必ず分けて書く
 
 ---
 
@@ -12,10 +26,8 @@ GitHub: https://github.com/NaoyaOshima708/sumikko-keiri-app
 - 領収書撮影 → Claude OCR →（任意で仕訳）→ Googleスプレッドシート同期
 - Web: https://receipt.sumikko-app.com
 - API: `https://receipt.sumikko-app.com/api`（Laravel Sanctum Bearer）
-- Laravel 本番パス（共有情報）: `/var/www/html/accounting.maspis.com`
-- **API用PHP（削除・CSV）の控え**: このリポジトリの `server-api/`  
-  - 本番実体: `routes/api.php` と `app/Http/Controllers/Api/ReceiptController.php`  
-  - Monaca には上げない（`www/` だけ）
+- Laravel 本番パス: `/var/www/html/accounting.maspis.com`
+- API用PHPの控え: `server-api/`（詳細は WHERE_TO_DEPLOY.md）
 - Web用 GitHub: https://github.com/NaoyaOshima708/sumikko-app
 - ログイン: Web は LINE Login。アプリはメールログインを先に実装
 - 公式LINE友だち追加が必須。未追加・ブロック時は API `403` + `code: line_friend_required`
