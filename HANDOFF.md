@@ -13,6 +13,9 @@ GitHub: https://github.com/NaoyaOshima708/sumikko-keiri-app
 - Web: https://receipt.sumikko-app.com
 - API: `https://receipt.sumikko-app.com/api`（Laravel Sanctum Bearer）
 - Laravel 本番パス（共有情報）: `/var/www/html/accounting.maspis.com`
+- **API用PHP（削除・CSV）の控え**: このリポジトリの `server-api/`  
+  - 本番実体: `routes/api.php` と `app/Http/Controllers/Api/ReceiptController.php`  
+  - Monaca には上げない（`www/` だけ）
 - Web用 GitHub: https://github.com/NaoyaOshima708/sumikko-app
 - ログイン: Web は LINE Login。アプリはメールログインを先に実装
 - 公式LINE友だち追加が必須。未追加・ブロック時は API `403` + `code: line_friend_required`
