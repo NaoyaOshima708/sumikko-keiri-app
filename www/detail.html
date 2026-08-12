@@ -19,9 +19,12 @@
       <label class="field">店舗名
         <input id="detailMerchant" type="text" autocomplete="off">
       </label>
-      <label class="field">購入日時
-        <input id="detailPurchasedAt" type="datetime-local">
-      </label>
+      <div class="field">購入日時
+        <div class="datetime-row">
+          <input id="detailPurchasedDate" type="date" aria-label="購入日">
+          <input id="detailPurchasedTime" type="time" aria-label="購入時刻">
+        </div>
+      </div>
       <label class="field">合計（日本円）
         <input id="detailTotalAmount" type="number" inputmode="decimal" min="0" step="1">
       </label>
@@ -57,6 +60,10 @@
         <div class="k">全文</div>
         <pre class="detail-raw" id="detailRawText">全文データはありません。</pre>
       </div>
+    </div>
+
+    <div class="card" style="margin-top:12px; margin-bottom:28px">
+      <button type="button" class="btn btn-danger" id="detailDeleteBtn">このレシートを削除</button>
     </div>
   </div>
 </ons-page>

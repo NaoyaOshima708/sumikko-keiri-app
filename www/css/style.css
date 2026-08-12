@@ -219,6 +219,22 @@ ons-page {
   font-size: 1rem;
   background: #fff;
   color: var(--text);
+  text-align: left !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.datetime-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.datetime-row input {
+  margin-top: 0;
+  min-width: 0;
+  width: 100%;
 }
 
 .field ons-input {
@@ -283,6 +299,62 @@ ons-page {
   background: #fff;
   color: var(--brand-navy);
   border: 1px solid #cbd5e1;
+}
+
+.btn-danger {
+  background: #fff;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+
+.btn-compact {
+  padding: 10px 14px;
+  font-size: 0.92rem;
+}
+
+.month-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.month-actions .btn {
+  width: auto;
+  flex: 1;
+}
+
+.text-link-btn {
+  border: none;
+  background: transparent;
+  color: var(--brand-orange);
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 8px 4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.csv-history-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mini-btn {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: var(--brand-navy);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mini-btn.mini-danger {
+  color: var(--danger);
+  border-color: #fecaca;
 }
 
 .stack {

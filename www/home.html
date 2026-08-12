@@ -16,6 +16,12 @@
         <button type="button" class="month-nav" id="monthNextBtn" aria-label="次の月">›</button>
       </div>
       <p class="sub" id="homeLead">レシート日付基準 ／ 右下の＋から撮影</p>
+      <div class="month-actions">
+        <button type="button" class="btn btn-outline btn-compact" id="csvExportBtn">この月をCSV出力</button>
+        <button type="button" class="text-link-btn" id="csvHistoryBtn">CSV履歴</button>
+      </div>
+      <p class="hint-text" id="homeCsvHint"></p>
+      <p class="error-text" id="homeCsvError"></p>
     </div>
     <div class="receipt-list" id="receiptList"></div>
     <div class="empty-box" id="homeEmpty" style="display:none">

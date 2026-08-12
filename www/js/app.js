@@ -252,7 +252,7 @@
     return String(n).padStart(2, '0');
   }
 
-  // datetime-local 用（端末ローカル時刻）
+  // 端末ローカルの日付・時刻（iOSのdatetime-localは崩れるため分離）
   function toDatetimeLocalValue(iso) {
     if (!iso) return '';
     const d = new Date(iso);
@@ -276,11 +276,22 @@
     return '';
   }
 
-  function fromDatetimeLocalValue(v) {
-    if (!v) return null;
-    const s = String(v).trim();
-    if (s.length === 16) return s.replace('T', ' ') + ':00';
-    return s.replace('T', ' ');
+  function toDateValue(iso) {
+    const v = toDatetimeLocalValue(iso);
+    return v ? v.slice(0, 10) : '';
+  }
+
+  function toTimeValue(iso) {
+    const v = toDatetimeLocalValue(iso);
+    return v ? v.slice(11, 16) : '';
+  }
+
+  function fromDateTimeParts(dateVal, timeVal) {
+    const date = String(dateVal || '').trim();
+    if (!date) return null;
+    let time = String(timeVal || '').trim() || '00:00';
+    if (time.length === 5) time += ':00';
+    return date + ' ' + time;
   }
 
   function amountInputValue(v) {
@@ -373,7 +384,8 @@
     };
 
     setVal('#detailMerchant', r.merchant_name || '');
-    setVal('#detailPurchasedAt', toDatetimeLocalValue(r.purchased_at));
+    setVal('#detailPurchasedDate', toDateValue(r.purchased_at));
+    setVal('#detailPurchasedTime', toTimeValue(r.purchased_at));
     setVal('#detailTotalAmount', amountInputValue(r.total_amount));
     setVal('#detailTaxAmount', amountInputValue(r.tax_amount));
     setVal('#detailCurrency', (r.currency || 'JPY').toUpperCase());
@@ -448,7 +460,10 @@
 
     const payload = {
       merchant_name: String(inputValue(page, '#detailMerchant') || '').trim() || null,
-      purchased_at: fromDatetimeLocalValue(inputValue(page, '#detailPurchasedAt')),
+      purchased_at: fromDateTimeParts(
+        inputValue(page, '#detailPurchasedDate'),
+        inputValue(page, '#detailPurchasedTime')
+      ),
       total_amount: totalAmount,
       tax_amount: taxAmount,
       currency: currency,
@@ -484,6 +499,177 @@
     } catch (e) {
       if (err) err.textContent = e.message || String(e);
     }
+  }
+
+  async function deleteDetail(page) {
+    const r = state.detail || {};
+    if (!r.id) return;
+    const ok = await ons.notification.confirm({
+      title: '削除確認',
+      message: 'このレシートを削除しますか？この操作は取り消せません。',
+      buttonLabels: ['キャンセル', '削除する'],
+    });
+    if (ok !== 1) return;
+
+    const err = page.querySelector('#detailError');
+    const btn = page.querySelector('#detailDeleteBtn');
+    if (err) err.textContent = '';
+    if (btn) btn.disabled = true;
+    try {
+      await SumikkoApi.deleteReceipt(r.id);
+      clearDetailPoll();
+      revokeDetailImage();
+      state.detail = null;
+      await nav().popPage();
+      ons.notification.toast('削除しました', { timeout: 1800 });
+    } catch (e) {
+      if (err) err.textContent = e.message || String(e);
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  const CSV_HISTORY_KEY = 'sumikko_csv_history';
+
+  function loadCsvHistory() {
+    try {
+      const raw = localStorage.getItem(CSV_HISTORY_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function persistCsvHistory(list) {
+    localStorage.setItem(CSV_HISTORY_KEY, JSON.stringify((list || []).slice(0, 30)));
+  }
+
+  function addCsvHistoryEntry(entry) {
+    const list = loadCsvHistory();
+    list.unshift(entry);
+    persistCsvHistory(list);
+  }
+
+  function removeCsvHistoryEntry(id) {
+    persistCsvHistory(
+      loadCsvHistory().filter(function (x) {
+        return String(x.id) !== String(id);
+      })
+    );
+  }
+
+  async function shareCsvFile(filename, content) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+    try {
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], filename, { type: 'text/csv' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: filename });
+          return true;
+        }
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return true;
+      console.warn('share files failed', e);
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: filename, text: content });
+        return true;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return true;
+      console.warn('share text failed', e);
+    }
+
+    // フォールバック: 新規タブ / ダウンロード相当
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+      a.remove();
+    }, 1500);
+    return true;
+  }
+
+  async function exportCurrentMonthCsv(page) {
+    const month = state.historyMonth || monthNow();
+    const hint = page.querySelector('#homeCsvHint');
+    const err = page.querySelector('#homeCsvError');
+    const btn = page.querySelector('#csvExportBtn');
+    if (hint) hint.textContent = 'CSVを作成しています…';
+    if (err) err.textContent = '';
+    if (btn) btn.disabled = true;
+    try {
+      const res = await SumikkoApi.exportCsv(month);
+      const entry = {
+        id: String(Date.now()),
+        month: month,
+        monthLabel: formatMonthJa(month),
+        filename: res.filename || 'receipts_' + month + '.csv',
+        content: res.content || '',
+        createdAt: new Date().toISOString(),
+        bytes: (res.content || '').length,
+      };
+      addCsvHistoryEntry(entry);
+      if (hint) {
+        hint.textContent = formatMonthJa(month) + ' のCSVを履歴に保存しました。共有画面を開きます。';
+      }
+      await shareCsvFile(entry.filename, entry.content);
+    } catch (e) {
+      console.error('csv export failed', e);
+      if (err) err.textContent = e.message || String(e);
+      if (hint) hint.textContent = '';
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function fillCsvHistory(page) {
+    const list = page.querySelector('#csvHistoryList');
+    const empty = page.querySelector('#csvHistoryEmpty');
+    list.innerHTML = '';
+    const items = loadCsvHistory();
+    if (!items.length) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    items.forEach(function (item) {
+      const el = document.createElement('div');
+      el.className = 'receipt-card csv-history-card';
+      const when = (item.createdAt || '').slice(0, 16).replace('T', ' ');
+      el.innerHTML =
+        '<div class="left-col">' +
+        '<div class="name">' +
+        escapeHtml(item.monthLabel || formatMonthJa(item.month)) +
+        '</div>' +
+        '<div class="meta">' +
+        escapeHtml(when || '-') +
+        ' ／ ' +
+        escapeHtml(item.filename || 'receipts.csv') +
+        '</div></div>' +
+        '<div class="right-col csv-history-actions">' +
+        '<button type="button" class="mini-btn" data-act="share">再共有</button>' +
+        '<button type="button" class="mini-btn mini-danger" data-act="delete">削除</button>' +
+        '</div>';
+      el.querySelector('[data-act="share"]').onclick = function (ev) {
+        ev.stopPropagation();
+        shareCsvFile(item.filename || 'receipts.csv', item.content || '');
+      };
+      el.querySelector('[data-act="delete"]').onclick = function (ev) {
+        ev.stopPropagation();
+        removeCsvHistoryEntry(item.id);
+        fillCsvHistory(page);
+      };
+      list.appendChild(el);
+    });
   }
 
   function settingsHasKey(settings) {
@@ -760,6 +946,12 @@
         state.historyMonth = next;
         loadHome(page);
       };
+      page.querySelector('#csvExportBtn').onclick = function () {
+        exportCurrentMonthCsv(page);
+      };
+      page.querySelector('#csvHistoryBtn').onclick = function () {
+        nav().pushPage('csv-history.html');
+      };
       loadHome(page);
       return;
     }
@@ -796,7 +988,21 @@
           retryDetail(page);
         };
       }
+      const deleteBtn = page.querySelector('#detailDeleteBtn');
+      if (deleteBtn) {
+        deleteBtn.onclick = function () {
+          deleteDetail(page);
+        };
+      }
       fillDetail(page);
+      return;
+    }
+
+    if (page.id === 'csvHistoryPage') {
+      page.querySelector('#csvHistoryBackBtn').onclick = function () {
+        nav().popPage();
+      };
+      fillCsvHistory(page);
       return;
     }
 

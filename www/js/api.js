@@ -184,6 +184,45 @@
     });
   }
 
+  function requestText(path, accept) {
+    const headers = buildHeaders({ Accept: accept || 'text/csv,application/json' });
+    const url = config.apiBase + path;
+
+    return new Promise(function (resolve, reject) {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        Object.keys(headers).forEach(function (key) {
+          xhr.setRequestHeader(key, headers[key]);
+        });
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState !== 4) return;
+          if (xhr.status === 0) {
+            reject(networkError(new Error('Load failed / status=0（CORSまたは通信遮断）')));
+            return;
+          }
+          if (xhr.status < 200 || xhr.status >= 300) {
+            rejectHttp(xhr.status, parseBody(xhr.responseText || ''), reject);
+            return;
+          }
+          let filename = 'receipts.csv';
+          const cd = xhr.getResponseHeader('Content-Disposition') || '';
+          const m = cd.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+          if (m) {
+            filename = decodeURIComponent(m[1] || m[2] || filename);
+          }
+          resolve({ content: xhr.responseText || '', filename: filename });
+        };
+        xhr.onerror = function () {
+          reject(networkError(new Error('xhr.onerror')));
+        };
+        xhr.send(null);
+      } catch (e) {
+        reject(networkError(e));
+      }
+    });
+  }
+
   const SumikkoApi = {
     login: function (email, password) {
       return jsonRequest('POST', '/login', {
@@ -230,8 +269,16 @@
     updateReceipt: function (id, payload) {
       return jsonRequest('PATCH', '/receipts/' + id, payload);
     },
+    deleteReceipt: function (id) {
+      return jsonRequest('DELETE', '/receipts/' + id, {});
+    },
     retryReceipt: function (id) {
       return jsonRequest('POST', '/receipts/' + id + '/retry', {});
+    },
+    // Web版 一般CSV（対象月）
+    exportCsv: function (month) {
+      const q = typeof month === 'string' ? '?month=' + encodeURIComponent(month) : '';
+      return requestText('/receipts/export.csv' + q);
     },
     settings: function () {
       return getRequest('/settings');
